@@ -11,11 +11,13 @@
   },
   "suffix": ".bs.js",
   "bs-dependencies": [
+    "@glennsl/bs-json",
     "bs-axios",
     "reason-future"
   ],
   "warnings": {
-    "error": "+101"
+    "error": "+101",
+    "number": "-44"
   },
   "namespace": true,
   "refmt": 3

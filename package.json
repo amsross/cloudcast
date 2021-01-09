@@ -1,5 +1,6 @@
 {
   "name": "cloudcast",
+  "bin": "./lib/js/src/Bin.bs.js",
   "version": "0.1.0",
   "scripts": {
     "build": "bsb -make-world",
@@ -15,6 +16,7 @@
     "bs-platform": "^8.4.2"
   },
   "dependencies": {
+    "@glennsl/bs-json": "^5.0.2",
     "axios": "^0.21.1",
     "bs-axios": "0.0.43",
     "reason-future": "^2.6.0"
