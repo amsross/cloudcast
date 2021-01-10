@@ -36,27 +36,24 @@ let (lat, lon, key, phone_number) =
 
 Future.liftA3(App.main, lat, lon, key)
 ->Future.flatMapOk(Function.id)
-->Future.flatMapOk(Function.id)
+->Future.mapOk(({sunset, clouds, pop, feels_like: {eve}}) => {
+    let sunset =
+      sunset->( *. )(1000.)->Js.Date.fromFloat->Js.Date.toLocaleTimeString;
+    let clouds = clouds->Js.Float.toString;
+    let pop = pop->Js.Float.toString;
+    let eve = eve->Js.Float.toString;
+
+    [|
+      "sunset: " ++ sunset,
+      "evening temp: " ++ eve,
+      "cloudiness: " ++ clouds ++ "%",
+      "probability of precip: " ++ pop ++ "%",
+    |]
+    |> Js.Array.joinWith("\n");
+  })
 ->Future.get(result =>
     switch (result) {
-    | Ok({sunset, clouds, pop, feels_like: {eve}}) =>
-      let sunset =
-        sunset->( *. )(1000.)->Js.Date.fromFloat->Js.Date.toLocaleTimeString;
-      let clouds = clouds->Js.Float.toString;
-      let pop = pop->Js.Float.toString;
-      let eve = eve->Js.Float.toString;
-
-      Js.Console.log(
-        "sunset: "
-        ++ sunset
-        ++ "\nevening temp: "
-        ++ eve
-        ++ "\ncloudiness: "
-        ++ clouds
-        ++ "%\nprobability of precip: "
-        ++ pop
-        ++ "%",
-      );
+    | Ok(result) => Js.Console.log(result)
     | Error(MissingEnv(env)) => Js.Console.error("Missing Env Va: " ++ env)
     | Error(App.TooCloudy(pct)) =>
       Js.Console.error("Too Cloudy -- " ++ Js.Float.toString(pct) ++ "%")
