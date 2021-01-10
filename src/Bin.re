@@ -33,40 +33,73 @@ let (lat, lon, key, phone_number) =
     ->Future.value,
   );
 
-Future.mapOk3(lat, lon, key, App.main)
-->Future.flatMapOk(Function.id)
-->Future.mapOk(({sunset, clouds, pop, feels_like: {eve}}) => {
-    let sunset =
-      sunset->( *. )(1000.)->Js.Date.fromFloat->Js.Date.toLocaleTimeString;
-    let clouds = clouds->Js.Float.toString;
-    let pop = pop->Js.Float.toString;
-    let eve = eve->Js.Float.toString;
+let cron = (event, context, callback) =>
+  Future.mapOk3(lat, lon, key, App.main)
+  ->Future.flatMapOk(Function.id)
+  ->Future.mapOk(({sunset, clouds, pop, feels_like: {eve}}) => {
+      let sunset =
+        sunset->( *. )(1000.)->Js.Date.fromFloat->Js.Date.toLocaleTimeString;
+      let clouds = clouds->Js.Float.toString;
+      let pop = pop->Js.Float.toString;
+      let eve = eve->Js.Float.toString;
 
-    [|
-      "sunset: " ++ sunset,
-      "evening temp: " ++ eve,
-      "cloudiness: " ++ clouds ++ "%",
-      "probability of precip: " ++ pop ++ "%",
-    |]
-    |> Js.Array.joinWith("\n");
-  })
-->Future.mapOk2(phone_number, (message, phone_number) =>
-    AWS.SNS.(
-      make()->publish({"PhoneNumber": phone_number, "Message": message})
+      [|
+        "sunset: " ++ sunset,
+        "evening temp: " ++ eve,
+        "cloudiness: " ++ clouds ++ "%",
+        "probability of precip: " ++ pop ++ "%",
+      |]
+      |> Js.Array.joinWith("\n");
+    })
+  ->Future.mapOk2(phone_number, (message, phone_number) =>
+      AWS.SNS.(
+        make()->publish({"PhoneNumber": phone_number, "Message": message})
+      )
     )
-  )
-->Future.flatMapOk(Function.id)
-->Future.get(result =>
-    switch (result) {
-    | Ok(result) => Js.Console.log(result)
-    | Error(MissingEnv(env)) => Js.Console.error("Missing Env Va: " ++ env)
-    | Error(App.TooCloudy(pct)) =>
-      Js.Console.error("Too Cloudy -- " ++ Js.Float.toString(pct) ++ "%")
-    | Error(App.TooRainy(pop)) =>
-      Js.Console.error("Too Rainy -- " ++ Js.Float.toString(pop) ++ "%")
-    | Error(App.TooCold(tmp)) =>
-      Js.Console.error("Too Rainy -- " ++ Js.Float.toString(tmp))
-    | Error(AWS.Error(err)) => Js.Console.error(err)
-    | Error(err) => Js.Console.error(err)
-    }
-  );
+  ->Future.flatMapOk(Function.id)
+  ->Future.get(result =>
+      switch (result) {
+      | Ok(result) => callback(Js.Nullable.null, Js.Nullable.return(result))
+      | Error(MissingEnv(env)) =>
+        callback(
+          Js.Nullable.return("Missing Env Var: " ++ env),
+          Js.Nullable.null,
+        )
+      | Error(App.TooCloudy(pct)) =>
+        callback(
+          Js.Nullable.return(
+            "Too Cloudy -- " ++ Js.Float.toString(pct) ++ "%",
+          ),
+          Js.Nullable.null,
+        )
+      | Error(App.TooRainy(pop)) =>
+        callback(
+          Js.Nullable.return(
+            "Too Rainy -- " ++ Js.Float.toString(pop) ++ "%",
+          ),
+          Js.Nullable.null,
+        )
+      | Error(App.TooCold(tmp)) =>
+        callback(
+          Js.Nullable.return("Too Rainy -- " ++ Js.Float.toString(tmp)),
+          Js.Nullable.null,
+        )
+      | Error(AWS.Error(err)) =>
+        switch (Js.Exn.message(err)) {
+        | Some(message) =>
+          callback(Js.Nullable.return(message), Js.Nullable.null)
+        | _ =>
+          Js.Console.error(err);
+          callback(
+            Js.Nullable.return("An unknown error occured"),
+            Js.Nullable.null,
+          );
+        }
+      | Error(err) =>
+        Js.Console.error(err);
+        callback(
+          Js.Nullable.return("An unknown error occured"),
+          Js.Nullable.null,
+        );
+      }
+    );
