@@ -3,6 +3,7 @@ exception MissingEnv(string);
 module Function = Helpers.Function;
 module Option = Helpers.Option;
 module Result = Helpers.Result;
+module Future = Helpers.Future;
 
 [@bs.val] [@bs.scope ("process", "env")]
 external key: option(Js.Json.t) = "API_KEY";
@@ -17,19 +18,24 @@ let (lat, lon, key, phone_number) =
   Json.Decode.(
     lat
     ->Option.map(either(float, map(float_of_string, string)))
-    ->Option.toResult(MissingEnv("Missing LAT")),
+    ->Option.toResult(MissingEnv("Missing LAT"))
+    ->Future.value,
     lon
     ->Option.map(either(float, map(float_of_string, string)))
-    ->Option.toResult(MissingEnv("LON")),
+    ->Option.toResult(MissingEnv("LON"))
+    ->Future.value,
     key
     ->Option.map(string)
-    ->Option.toResult(MissingEnv("API_KEY")),
+    ->Option.toResult(MissingEnv("API_KEY"))
+    ->Future.value,
     phone_number
     ->Option.map(string)
-    ->Option.toResult(MissingEnv("PHONE_NUMBER")),
+    ->Option.toResult(MissingEnv("PHONE_NUMBER"))
+    ->Future.value,
   );
 
-Future.value(Result.liftA3(App.main, lat, lon, key))
+Future.liftA3(App.main, lat, lon, key)
+->Future.flatMapOk(Function.id)
 ->Future.flatMapOk(Function.id)
 ->Future.get(result =>
     switch (result) {
