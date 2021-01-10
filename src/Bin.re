@@ -50,6 +50,12 @@ Future.mapOk3(lat, lon, key, App.main)
     |]
     |> Js.Array.joinWith("\n");
   })
+->Future.mapOk2(phone_number, (message, phone_number) =>
+    AWS.SNS.(
+      make()->publish({"PhoneNumber": phone_number, "Message": message})
+    )
+  )
+->Future.flatMapOk(Function.id)
 ->Future.get(result =>
     switch (result) {
     | Ok(result) => Js.Console.log(result)
