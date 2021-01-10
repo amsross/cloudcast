@@ -17,6 +17,7 @@
   },
   "dependencies": {
     "@glennsl/bs-json": "^5.0.2",
+    "aws-sdk": "^2.824.0",
     "axios": "^0.21.1",
     "bs-axios": "0.0.43",
     "reason-future": "^2.6.0"
