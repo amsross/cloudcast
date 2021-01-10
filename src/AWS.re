@@ -1,9 +1,11 @@
 exception Error(Js.Exn.t);
 
+/* https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/Response.html */
 module Response = (Req: {type t;}, Res: {type t;}) => {
   type t = Res.t;
 };
 
+/* https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/Request.html */
 module Request = (Req: {type t;}, Res: {type t;}) => {
   module Response = Response(Req, Res);
   type t = Req.t;
@@ -40,6 +42,7 @@ module Request = (Req: {type t;}, Res: {type t;}) => {
     "send";
 };
 
+/* https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/SNS.html */
 module SNS = {
   module Req = {
     type t;
