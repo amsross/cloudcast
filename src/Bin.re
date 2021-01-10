@@ -51,6 +51,14 @@ Future.value(Result.liftA3(App.main, lat, lon, key))
         ++ pop
         ++ "%",
       );
+    | Error(MissingEnv(env)) => Js.Console.error("Missing Env Va: " ++ env)
+    | Error(App.TooCloudy(pct)) =>
+      Js.Console.error("Too Cloudy -- " ++ Js.Float.toString(pct) ++ "%")
+    | Error(App.TooRainy(pop)) =>
+      Js.Console.error("Too Rainy -- " ++ Js.Float.toString(pop) ++ "%")
+    | Error(App.TooCold(tmp)) =>
+      Js.Console.error("Too Rainy -- " ++ Js.Float.toString(tmp))
+    | Error(AWS.Error(err)) => Js.Console.error(err)
     | Error(err) => Js.Console.error(err)
     }
   );
