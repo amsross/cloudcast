@@ -8,8 +8,10 @@ external key: option(Js.Json.t) = "API_KEY";
 external lat: option(Js.Json.t) = "LAT";
 [@bs.val] [@bs.scope ("process", "env")]
 external lon: option(Js.Json.t) = "LON";
+[@bs.val] [@bs.scope ("process", "env")]
+external phone_number: option(Js.Json.t) = "PHONE_NUMBER";
 
-let (lat, lon, key) =
+let (lat, lon, key, phone_number) =
   Json.Decode.(
     lat
     ->Option.map(either(float, map(float_of_string, string)))
@@ -18,6 +20,9 @@ let (lat, lon, key) =
     ->Option.map(either(float, map(float_of_string, string)))
     ->Option.toResult("Missing LON"),
     key->Option.map(string)->Option.toResult("Missing API_KEY"),
+    phone_number
+    ->Option.map(string)
+    ->Option.toResult("Missing PHONE_NUMBER")
   );
 
 Future.value(Result.liftA3(App.main, lat, lon, key))
