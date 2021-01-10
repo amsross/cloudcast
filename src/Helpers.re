@@ -16,7 +16,7 @@ module Option = {
 
   let liftA3 = (f, a, b, c) => apply(c, liftA2(f, a, b));
 
-  let toResult = (a, err) => a->mapWithDefault(Error(err), a => Ok(a));
+  let toResult = (a, exn) => a->mapWithDefault(Error(exn), a => Ok(a));
 };
 
 module Result = {
@@ -24,11 +24,22 @@ module Result = {
 
   let map = (a, f) => map(a, f);
   let flatMap = (a, f) => flatMap(a, f);
-  let apply: (t('a, 'e), t('a => 'b, 'e)) => t('ok, 'e) =
+  let apply: (t('a, 'e), t('a => 'b, 'e)) => t('b, 'e) =
     (a, m) => flatMap(m, map(a));
 
   let liftA2: (('a, 'b) => 'c, t('a, 'e), t('b, 'e)) => t('c, 'e) =
     (f, a, b) => apply(b, map(a, f));
   let liftA3 = (f, a, b, c) => apply(c, liftA2(f, a, b));
   let toOption = a => a->mapWithDefault(None, a => Some(a));
+};
+
+module Future = {
+  include Future;
+
+  let apply:
+    (t(result('a, 'e)), t(result('a => 'b, 'e))) => t(result('b, 'e)) =
+    (a, m) => flatMapOk(m, mapOk(a));
+
+  let liftA2 = (f, a, b) => apply(b, mapOk(a, f));
+  let liftA3 = (f, a, b, c) => apply(c, liftA2(f, a, b));
 };
