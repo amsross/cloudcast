@@ -3,6 +3,7 @@
   "bin": "./lib/js/src/Bin.bs.js",
   "version": "0.1.0",
   "scripts": {
+    "prebuild": "npm run clean",
     "build": "bsb -make-world",
     "start": "bsb -make-world -w",
     "clean": "bsb -clean-world"
