@@ -27,3 +27,15 @@ jobs:
 
     - name: build artifacts
       run: npm run build --if-present
+
+    - name: deploy to aws
+      env:
+        AWS_REGION: us-east-1
+        OPENWEATHER_API_KEY: ${{ secrets.OPENWEATHER_API_KEY }}
+        LATITUDE: ${{ secrets.LATITUDE }}
+        LONGITUDE: ${{ secrets.LONGITUDE }}
+        PHONE_NUMBER: ${{ secrets.PHONE_NUMBER }}
+        AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      run: npx serverless deploy --stage main
