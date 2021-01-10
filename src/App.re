@@ -1,5 +1,9 @@
 let excludes = [|`hourly, `minutely, `current, `alerts|];
 
+exception TooCloudy(float);
+exception TooRainy(float);
+exception TooCold(float);
+
 let main = (lat, lon, key) => {
   let now = Js.Date.make()->Js.Date.valueOf->(/.)(1000.);
 
@@ -7,7 +11,7 @@ let main = (lat, lon, key) => {
   ->Future.map(response =>
       switch (response) {
       | Ok({daily: Some(daily)}) => Ok(daily)
-      | _ => Error("No daily response found")
+      | _ => Error(Not_found)
       }
     )
   ->Future.mapOk(daily =>
@@ -25,18 +29,18 @@ let main = (lat, lon, key) => {
       switch (response) {
       | Ok(Some(daily)) => Ok(daily)
       | Error(_) as err => err
-      | _ => Error("No daily response found")
+      | _ => Error(Not_found)
       }
     )
   ->Future.map(response =>
       switch (response) {
       | Ok({clouds, pop, feels_like: {eve}} as daily) =>
         if (clouds > 25.) {
-          Error("Too cloudy - " ++ Js.Float.toString(clouds) ++ "%");
+          Error(TooCloudy(clouds));
         } else if (pop > 20.) {
-          Error("Might Rain - " ++ Js.Float.toString(pop) ++ "%");
+          Error(TooRainy(pop));
         } else if (eve < 20.) {
-          Error("Too Cold - " ++ Js.Float.toString(eve));
+          Error(TooCold(eve));
         } else {
           Ok(daily);
         }
