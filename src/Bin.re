@@ -3,7 +3,6 @@ exception MissingEnv(string);
 module Function = Helpers.Function;
 module Option = Helpers.Option;
 module Result = Helpers.Result;
-module Future = Helpers.Future;
 
 [@bs.val] [@bs.scope ("process", "env")]
 external key: option(Js.Json.t) = "API_KEY";
@@ -34,7 +33,7 @@ let (lat, lon, key, phone_number) =
     ->Future.value,
   );
 
-Future.liftA3(App.main, lat, lon, key)
+Future.mapOk3(lat, lon, key, App.main)
 ->Future.flatMapOk(Function.id)
 ->Future.mapOk(({sunset, clouds, pop, feels_like: {eve}}) => {
     let sunset =

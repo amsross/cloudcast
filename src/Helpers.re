@@ -32,14 +32,3 @@ module Result = {
   let liftA3 = (f, a, b, c) => apply(c, liftA2(f, a, b));
   let toOption = a => a->mapWithDefault(None, a => Some(a));
 };
-
-module Future = {
-  include Future;
-
-  let apply:
-    (t(result('a, 'e)), t(result('a => 'b, 'e))) => t(result('b, 'e)) =
-    (a, m) => flatMapOk(m, mapOk(a));
-
-  let liftA2 = (f, a, b) => apply(b, mapOk(a, f));
-  let liftA3 = (f, a, b, c) => apply(c, liftA2(f, a, b));
-};
