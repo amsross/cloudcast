@@ -5,11 +5,11 @@ module Option = Helpers.Option;
 module Result = Helpers.Result;
 
 [@bs.val] [@bs.scope ("process", "env")]
-external key: option(Js.Json.t) = "API_KEY";
+external key: option(Js.Json.t) = "OPENWEATHER_API_KEY";
 [@bs.val] [@bs.scope ("process", "env")]
-external lat: option(Js.Json.t) = "LAT";
+external lat: option(Js.Json.t) = "LATITUDE";
 [@bs.val] [@bs.scope ("process", "env")]
-external lon: option(Js.Json.t) = "LON";
+external lon: option(Js.Json.t) = "LONGITUDE";
 [@bs.val] [@bs.scope ("process", "env")]
 external phone_number: option(Js.Json.t) = "PHONE_NUMBER";
 
@@ -17,15 +17,15 @@ let (lat, lon, key, phone_number) =
   Json.Decode.(
     lat
     ->Option.map(either(float, map(float_of_string, string)))
-    ->Option.toResult(MissingEnv("Missing LAT"))
+    ->Option.toResult(MissingEnv("LATITUDE"))
     ->Future.value,
     lon
     ->Option.map(either(float, map(float_of_string, string)))
-    ->Option.toResult(MissingEnv("LON"))
+    ->Option.toResult(MissingEnv("LONGITUDE"))
     ->Future.value,
     key
     ->Option.map(string)
-    ->Option.toResult(MissingEnv("API_KEY"))
+    ->Option.toResult(MissingEnv("OPENWEATHER_API_KEY"))
     ->Future.value,
     phone_number
     ->Option.map(string)
