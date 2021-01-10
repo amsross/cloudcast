@@ -1,3 +1,5 @@
+exception MissingEnv(string);
+
 module Function = Helpers.Function;
 module Option = Helpers.Option;
 module Result = Helpers.Result;
@@ -15,14 +17,16 @@ let (lat, lon, key, phone_number) =
   Json.Decode.(
     lat
     ->Option.map(either(float, map(float_of_string, string)))
-    ->Option.toResult("Missing LAT"),
+    ->Option.toResult(MissingEnv("Missing LAT")),
     lon
     ->Option.map(either(float, map(float_of_string, string)))
-    ->Option.toResult("Missing LON"),
-    key->Option.map(string)->Option.toResult("Missing API_KEY"),
+    ->Option.toResult(MissingEnv("LON")),
+    key
+    ->Option.map(string)
+    ->Option.toResult(MissingEnv("API_KEY")),
     phone_number
     ->Option.map(string)
-    ->Option.toResult("Missing PHONE_NUMBER")
+    ->Option.toResult(MissingEnv("PHONE_NUMBER")),
   );
 
 Future.value(Result.liftA3(App.main, lat, lon, key))
